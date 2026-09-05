@@ -1,0 +1,120 @@
+---
+title: "Plans for my Final Project"
+author: "Kara Reed"
+execute:
+  echo: false
+---
+For my final project, I plan to explore how we might be able to predict whether a clinical drug trial will terinate early, and what factors are associated with termination. 
+
+For this project, I will have two connected questions: 
+  
+    1.) How might it be possible to predict the failure of a clinical trial from the information availible about the trial?
+ 
+    2.) What factors may be present that may cause the trial to terminate?
+
+I intend to utilize not only in-depth information on clinical trials from sites such as ClinicalTrials.gov, act.ctti-clinicaltrials.org, and Open.fda.gov, but to also use animations, graphs, maps, and interatives to maximize learning and engagement from users and researchers. 
+
+There are several variables that could influence clinical trials that I will need to invesitgate for this project, including **trial phases** (I, II, and III may have different failure risks associated with them), **study types**, **random vs. non-randomized allocations**, the **complexity of the trials** or trial type I explore, the **number of interventions** that may have taken place in the trials I research, if a **placebo** was used within the trial (which could affect the design of the trial), and the **primary outcome type**. 
+
+Perhaps the most important variables in clinical drug trials include **recruitment** variables such as enrollment, number of sites, and study duration; **sponsor** variables; **therapeutic areas**; **time variables**; and **why trials stopped**. 
+
+Before diving into any specific research, here is a chart displaying the annual termination rate of cardiovascular clinical trials registered from 2000 through March 2025:
+
+```{r}
+#| message: false
+#| warning: false
+#| fig-width: 12
+#| fig-height: 7
+#| out-width: 100%
+library(tidyverse)
+
+trial_status <- tribble(
+  ~year, ~terminated, ~completed, ~total, ~termination_rate,
+  2000, 1, 34, 35, 2.86,
+  2001, 5, 47, 52, 9.62,
+  2002, 2, 53, 55, 3.64,
+  2003, 8, 126, 134, 5.97,
+  2004, 16, 194, 210, 7.62,
+  2005, 27, 409, 436, 6.19,
+  2006, 52, 424, 476, 10.92,
+  2007, 62, 535, 597, 10.39,
+  2008, 79, 634, 713, 11.08,
+  2009, 95, 733, 828, 11.47,
+  2010, 106, 674, 780, 13.59,
+  2011, 103, 747, 850, 12.12,
+  2012, 119, 795, 914, 13.02,
+  2013, 113, 827, 940, 12.02,
+  2014, 144, 906, 1050, 13.71,
+  2015, 126, 955, 1081, 11.66,
+  2016, 119, 1011, 1130, 10.53,
+  2017, 136, 1019, 1155, 11.77,
+  2018, 139, 1040, 1179, 11.79,
+  2019, 107, 1138, 1245, 8.59,
+  2020, 155, 878, 1033, 15.00,
+  2021, 135, 880, 1015, 13.30,
+  2022, 141, 999, 1140, 12.37,
+  2023, 114, 1032, 1146, 9.95,
+  2024, 83, 770, 853, 9.73,
+  2025, 14, 80, 94, 14.89
+)
+
+overall_rate <- 11.47
+
+ggplot(trial_status, aes(x = year, y = termination_rate)) +
+  annotate("rect", xmin = 2019.5, xmax = 2020.5, ymin = -Inf, ymax = Inf,
+           fill = "#F4B942", alpha = 0.12) +
+  geom_area(fill = "#4EA8A7", alpha = 0.18) +
+  geom_line(color = "#087E8B", linewidth = 1.15) +
+  geom_point(color = "#087E8B", size = 2.3) +
+  geom_point(data = filter(trial_status, year == 2020),
+             color = "#F4B942", size = 4.1) +
+  geom_point(data = filter(trial_status, year == 2025),
+             color = "#D95D39", size = 3.3) +
+  geom_hline(yintercept = overall_rate, linetype = "dashed",
+             color = "#D95D39", linewidth = 0.55, alpha = 0.8) +
+  annotate("label", x = 2003.5, y = overall_rate + 0.8,
+           label = "Overall: 11.47%", color = "#A9472C", fill = "#FFF5EF",
+           label.size = 0, size = 3.1, fontface = "bold", label.padding = unit(0.25, "lines")) +
+  geom_text(
+    data = filter(trial_status, year %in% c(2000, 2010, 2025)),
+    aes(label = paste0(termination_rate, "%")),
+    vjust = -1.1, color = "#174A5B", fontface = "bold", size = 3.3
+  ) +
+  annotate("segment", x = 2020, xend = 2019.2, y = 15.2, yend = 16.35,
+           color = "#C7921A", linewidth = 0.7) +
+  annotate("label", x = 2018.4, y = 16.55,
+           label = "Peak: 15.00%\n155 of 1,033 trials",
+           color = "#174A5B", fill = "#FFF8E7", label.size = 0.3,
+           label.padding = unit(0.45, "lines"), fontface = "bold",
+           size = 3.4, lineheight = 0.95) +
+  scale_x_continuous(breaks = seq(2000, 2025, 5), limits = c(1999.5, 2025.5)) +
+  scale_y_continuous(
+    labels = function(x) paste0(x, "%"),
+    breaks = seq(0, 16, 2),
+    limits = c(0, 18),
+    expand = expansion(mult = c(0, 0.02))
+  ) +
+  labs(
+    title = "Annual Premature Termination Rates in Cardiovascular Clinical Trials",
+    subtitle = "Annual share of cardiovascular clinical trials marked terminated, 2000 to March 2025",
+    x = NULL,
+    y = "Termination rate",
+    caption = "Source: Supplemental eTable 1, Trends and Predictors of Premature Termination of Cardiovascular Trials.\nDOI: 10.1016/j.jacadv.2026.102606. The 2025 value covers January through March only. Information obtained from https://www.sciencedirect.com/science/article/pii/S2772963X26000232.",
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    plot.background = element_rect(fill = "#F5FAF9", color = NA),
+    panel.background = element_rect(fill = "#FFFFFF", color = NA),
+    plot.title.position = "plot",
+    plot.title = element_text(size = 18, face = "bold", color = "#163A4A", margin = margin(b = 5)),
+    plot.subtitle = element_text(size = 11, color = "#4B626B", margin = margin(b = 14)),
+    plot.caption = element_text(size = 8.5, color = "#5E6E73", hjust = 0, margin = margin(t = 12)),
+    axis.title.y = element_text(face = "bold", color = "#163A4A"),
+    axis.text = element_text(color = "#48616A"),
+    axis.ticks = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.grid.major.x = element_blank(),
+    panel.grid.major.y = element_line(color = "#DDE7E8", linewidth = 0.45),
+    plot.margin = margin(12, 18, 12, 12)
+  )
+```
